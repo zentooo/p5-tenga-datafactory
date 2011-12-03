@@ -19,7 +19,7 @@ sub new {
     my $opts = ref $_[0] ? $_[0] : +{@_};
 
     if ( ! $opts->{teng} && ! $opts->{dbh} ) {
-        croak "mandatory parameter teng || dbh missing.";
+        croak "mandatory parameter teng or dbh missing.";
     }
 
     if ( $opts->{dbh} ) {
@@ -53,7 +53,7 @@ sub define {
     $self->{_templates}{$name} = $params || +{};
 }
 
-sub sequence {
+sub define_seq {
     my ($self, $seq_name, $callback) = @_;
     croak sprintf("sequence with given name already exists: %s", $seq_name) if $self->{_sequences}{$seq_name};
 
@@ -73,7 +73,7 @@ sub seq {
         my $seq_name = "__identity__" . time . rand(10);
 
         # default sequence: behave like auto_increment
-        $self->sequence($seq_name, sub {
+        $self->define_seq($seq_name, sub {
             return shift;
         });
         return $self->{_sequences}{$seq_name};

@@ -12,7 +12,7 @@ my $teng = t::Utils->prepare_teng;
 subtest("data creation with sequence", sub {
     my $df = TengA::DataFactory->new(teng => $teng);
 
-    $df->sequence("ten", sub {
+    $df->define_seq("ten", sub {
         my $n = shift;
         return $n * 10;
     });
