@@ -26,10 +26,18 @@ sub create_sqlite {
     $dbh->do(q{
         CREATE TABLE user (
             id   integer,
+            item_id integer,
             age  integer,
             name text,
             gender text,
             country text,
+            primary key ( id )
+        )
+    });
+    $dbh->do(q{
+        CREATE TABLE item (
+            id   integer,
+            name text,
             primary key ( id )
         )
     });

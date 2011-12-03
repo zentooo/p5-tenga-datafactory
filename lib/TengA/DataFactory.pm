@@ -3,6 +3,9 @@ use 5.008_001;
 use strict;
 use warnings;
 
+use Teng;
+use Teng::Schema::Loader;
+
 use Carp qw/croak/;
 use Data::Util qw/:check/;
 use Hash::Merge::Simple qw/merge/;
@@ -14,7 +17,17 @@ sub new {
     my $class = shift;
     my $opts = ref $_[0] ? $_[0] : +{@_};
 
-    croak "param teng should be Teng object." unless $opts->{teng}->isa("Teng");
+    if ( ! $opts->{teng} && ! $opts->{dbh} ) {
+        croak "mandatory parameter teng || dbh missing.";
+    }
+
+    if ( $opts->{dbh} ) {
+        my $schema = Teng::Schema::Loader->load(
+            dbh => $opts->{dbh},
+            namespace => ($opts->{namespace} || "TengA::DataFactory::" . time . rand(10))
+        );
+        $opts->{teng} = Teng->new(dbh => $opts->{dbh}, schema => $schema);
+    }
 
     $opts->{_templates} = +{};
     $opts->{_sequences} = +{};
@@ -27,7 +40,7 @@ sub new {
 sub define {
     my ($self, $name, $params) = @_;
 
-    croak "table name or parent data name should be specified." if ! $params->{table} && ! $params->{extend};
+    croak "table name or parent template name should be specified." if ! $params->{table} && ! $params->{extend};
     croak sprintf("data with given name already exists: %s", $name) if $self->{_templates}{$name};
 
     $self->{_templates}{$name} = $params || +{};
@@ -36,7 +49,28 @@ sub define {
 sub sequence {
     my ($self, $seq_name, $callback) = @_;
     croak sprintf("sequence with given name already exists: %s", $seq_name) if $self->{_sequences}{$seq_name};
-    $self->{_sequences}{$seq_name} = $callback;
+
+    my $n = 1;
+    $self->{_sequences}{$seq_name} = sub {
+        $callback->($n++);
+    };
+}
+
+sub seq {
+    my ($self, $seq_name) = @_;
+
+    if ( $seq_name ) {
+        return $self->{_sequences}{$seq_name};
+    }
+    else {
+        my $seq_name = "identity_" . time . rand(10);
+
+        # default sequence: behave like auto_increment
+        $self->sequence($seq_name, sub {
+            return shift;
+        });
+        return $self->{_sequences}{$seq_name};
+    }
 }
 
 sub trait {
@@ -56,11 +90,6 @@ sub create {
     my $data = $self->_merge_data($template, $template->{data}, $params);
 
     return ($self->{_rows}{$name} = $self->{teng}->insert($table, $self->_check_and_fill_data($table, $data)));
-}
-
-sub attributes_for {
-    my ($self, $name) = @_;
-    return $self->{_rows}{$name}->get_columns;
 }
 
 sub _merge_data {
@@ -117,6 +146,8 @@ sub _check_and_fill_data {
 }
 
 sub _generate_data {
+    my ($self, $sql_type) = @_;
+
     return 1;
 }
 
