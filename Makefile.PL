@@ -26,9 +26,14 @@ use inc::Module::Install;
 
 all_from 'lib/TengA/DataFactory.pm';
 
+requires      'Teng';
+requires      'Data::Util';
+requires      'Hash::Merge::Simple';
+requires      'String::Random';
 
 test_requires 'Test::More'     => '0.88';
 test_requires 'Test::Requires' => '0.06';
+test_requires 'Test::Name::FromLine';
 
 auto_set_repository;
 
