@@ -9,6 +9,7 @@ use Teng::Schema::Loader;
 use Carp qw/croak/;
 use Data::Util qw/:check/;
 use Hash::Merge::Simple qw/merge/;
+use String::Random;
 
 our $VERSION = '0.01';
 
@@ -33,6 +34,12 @@ sub new {
     $opts->{_sequences} = +{};
     $opts->{_traits} = +{};
     $opts->{_rows} = +{};
+
+    $opts->{string_random} = String::Random->new;
+
+    $opts->{_sequences}{"__identity__"} = sub {
+        return shift;
+    };
 
     bless $opts, $class;
 }
@@ -63,7 +70,7 @@ sub seq {
         return $self->{_sequences}{$seq_name};
     }
     else {
-        my $seq_name = "identity_" . time . rand(10);
+        my $seq_name = "__identity__" . time . rand(10);
 
         # default sequence: behave like auto_increment
         $self->sequence($seq_name, sub {
@@ -148,7 +155,16 @@ sub _check_and_fill_data {
 sub _generate_data {
     my ($self, $sql_type) = @_;
 
-    return 1;
+    # integer like
+    if ( $sql_type && $sql_type == 4 ) {
+        return $self->seq("__identity__")->();
+    }
+    # string like
+    elsif ( $sql_type && $sql_type == 12 ) {
+        return $self->{string_random}->randregex("[A-Za-z0-9]{32}");
+    }
+
+    return int(rand(10) * 10);
 }
 
 1;

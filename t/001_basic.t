@@ -8,9 +8,9 @@ use t::Utils;
 use TengA::DataFactory;
 
 my $teng = t::Utils->prepare_teng;
+my $df = TengA::DataFactory->new(teng => $teng);
 
 subtest("simple data create", sub {
-    my $df = TengA::DataFactory->new(teng => $teng);
 
     $df->define("user1", +{
         table => "user",
@@ -33,7 +33,6 @@ subtest("simple data create", sub {
 });
 
 subtest("data autofill", sub {
-    my $df = TengA::DataFactory->new(teng => $teng);
 
     $df->define("user2", +{
         table => "user",
@@ -52,7 +51,6 @@ subtest("data autofill", sub {
 });
 
 subtest("simple data create with dbh", sub {
-    my $df = TengA::DataFactory->new(dbh => $teng->dbh);
 
     $df->define("user3", +{
         table => "user",
