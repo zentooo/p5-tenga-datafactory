@@ -13,6 +13,7 @@ our $VERSION = '0.01';
 sub new {
     my $class = shift;
     my $opts = ref $_[0] ? $_[0] : +{@_};
+
     croak "param teng should be Teng object." unless $opts->{teng}->isa("Teng");
 
     $opts->{_templates} = +{};
