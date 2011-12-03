@@ -1,0 +1,39 @@
+This is Perl module TengA::DataFactory.
+
+INSTALLATION
+
+Type the following command:
+
+    $ curl -L http://cpanmin.us | perl - TengA::DataFactory
+
+Or install cpanm and then run the following command to install
+TengA::DataFactory:
+
+    $ cpanm TengA::DataFactory
+
+If you get an archive of this distribution, unpack it and build it
+as per the usual:
+
+    $ tar xzf TengA-DataFactory-$version.tar.gz
+    $ cd TengA-DataFactory-$version
+    $ perl Makefile.PL
+    $ make && make test
+
+Then install it:
+
+    $ make install
+
+DOCUMENTATION
+
+TengA::DataFactory documentation is available as in POD. So you can do:
+
+    $ perldoc TengA::DataFactory
+
+to read the documentation online with your favorite pager.
+
+LICENSE AND COPYRIGHT
+
+Copyright (c) 2011, zentooo. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
