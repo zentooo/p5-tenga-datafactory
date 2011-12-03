@@ -30,8 +30,6 @@ subtest("simple data create", sub {
     $df->create("user1");
 
     ok($teng->single("user", +{ id => 1 }));
-
-    $df->attributes_for("user1");
 });
 
 subtest("data autofill", sub {
