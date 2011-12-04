@@ -104,13 +104,13 @@ sub create {
 sub delete {
     my ($self, $name) = @_;
     croak "specified data name not found" unless defined $self->{_rows}{$name};
-    $self->{_rows}{$name}->delete;
+    $self->{_rows}{$name}->delete && $self->{_rows}{$name};
 }
 
 sub delete_all {
     my ($self, $name) = @_;
     for my $key (keys %{$self->{_rows}{$name}} ) {
-        $self->{_rows}{$key}->delete;
+        $self->{_rows}{$key}->delete && $self->{_rows}{$key};
     }
 }
 
