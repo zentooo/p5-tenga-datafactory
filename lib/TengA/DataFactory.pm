@@ -50,14 +50,14 @@ sub define {
     my ($self, $name, $params) = @_;
 
     croak "table name or parent template name should be specified." if ! $params->{table} && ! $params->{extend};
-    croak sprintf("data with given name already exists: %s", $name) if $self->{_templates}{$name};
+    croak sprintf("template already exists: %s", $name) if $self->{_templates}{$name};
 
     $self->{_templates}{$name} = $params || +{};
 }
 
 sub define_seq {
     my ($self, $seq_name, $callback, $init) = @_;
-    croak sprintf("sequence with given name already exists: %s", $seq_name) if $self->{_sequences}{$seq_name};
+    croak sprintf("sequence already exists: %s", $seq_name) if $self->{_sequences}{$seq_name};
 
     my $n = $init || 1;
     $self->{_sequences}{$seq_name} = sub {
@@ -84,14 +84,15 @@ sub seq {
 
 sub trait {
     my ($self, $trait_name, $params) = @_;
-    croak sprintf("trait with given name already exists: %s", $trait_name) if $self->{_traits}{$trait_name};
+    croak sprintf("trait already exists: %s", $trait_name) if $self->{_traits}{$trait_name};
     $self->{_traits}{$trait_name} = $params;
 }
 
 sub create {
     my ($self, $name, $params) = @_;
 
-    my $template = $self->{_templates}{$name} or croak "specified data name not found";
+    croak sprintf("data already created: %s", $name) if $self->{_rows}{$name};
+    my $template = $self->{_templates}{$name} or croak sprintf("template not found: %s", $name);
 
     my $table = $template->{table} ? $template->{table} : $self->_resolve_table($template->{extend});
     croak sprintf("there are no such table: %s", $table) unless $self->{teng}->schema->get_table($table);
@@ -103,14 +104,14 @@ sub create {
 
 sub delete {
     my ($self, $name) = @_;
-    croak "specified data name not found" unless defined $self->{_rows}{$name};
-    $self->{_rows}{$name}->delete && $self->{_rows}{$name};
+    croak sprintf("data seems not to be created yet: %s", $name) unless defined $self->{_rows}{$name};
+    $self->{_rows}{$name}->delete && delete $self->{_rows}{$name};
 }
 
 sub delete_all {
-    my ($self, $name) = @_;
-    for my $key (keys %{$self->{_rows}{$name}} ) {
-        $self->{_rows}{$key}->delete && $self->{_rows}{$key};
+    my ($self) = @_;
+    for my $key (keys %{$self->{_rows}} ) {
+        $self->{_rows}{$key}->delete && delete $self->{_rows}{$key};
     }
 }
 
