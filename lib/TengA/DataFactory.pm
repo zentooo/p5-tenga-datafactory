@@ -101,6 +101,19 @@ sub create {
     return ($self->{_rows}{$name} = $self->{teng}->insert($table, $self->_check_and_fill_data($table, $data)));
 }
 
+sub delete {
+    my ($self, $name) = @_;
+    croak "specified data name not found" unless defined $self->{_rows}{$name};
+    $self->{_rows}{$name}->delete;
+}
+
+sub delete_all {
+    my ($self, $name) = @_;
+    for my $key (keys %{$self->{_rows}{$name}} ) {
+        $self->{_rows}{$key}->delete;
+    }
+}
+
 sub _merge_data {
     my ($self, $template, $params) = @_;
 
