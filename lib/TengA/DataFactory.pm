@@ -9,6 +9,7 @@ use Teng::Schema::Loader;
 use Carp qw/croak/;
 use Data::Util qw/:check/;
 use Hash::Merge::Simple qw/merge/;
+use Time::Piece::MySQL;
 use String::Random;
 
 our $VERSION = '0.01';
@@ -37,8 +38,9 @@ sub new {
 
     $opts->{string_random} = String::Random->new;
 
+    my $n = 1;
     $opts->{_sequences}{"__identity__"} = sub {
-        return shift;
+        return $n++;
     };
 
     bless $opts, $class;
@@ -54,10 +56,10 @@ sub define {
 }
 
 sub define_seq {
-    my ($self, $seq_name, $callback) = @_;
+    my ($self, $seq_name, $callback, $init) = @_;
     croak sprintf("sequence with given name already exists: %s", $seq_name) if $self->{_sequences}{$seq_name};
 
-    my $n = 1;
+    my $n = $init || 1;
     $self->{_sequences}{$seq_name} = sub {
         $callback->($n++);
     };
@@ -142,7 +144,7 @@ sub _check_and_fill_data {
             $filled_data->{$column} = $self->_generate_data($table_schema->get_sql_type($column));
         }
         elsif ( ref $data->{$column} eq "CODE" ) {
-            $filled_data->{$column} = $data->{$column}->();
+            $filled_data->{$column} = $data->{$column}->($table, $column);
         }
         else {
             $filled_data->{$column} = $data->{$column};
@@ -155,16 +157,35 @@ sub _check_and_fill_data {
 sub _generate_data {
     my ($self, $sql_type) = @_;
 
-    # integer like
-    if ( $sql_type && $sql_type == 4 ) {
+    return int(rand(1) * 10000000) unless $sql_type;
+
+    # looks like integer
+    if ( $sql_type == 4 ) {
         return $self->seq("__identity__")->();
     }
-    # string like
-    elsif ( $sql_type && $sql_type == 12 ) {
+    # looks like float
+    elsif ( $sql_type == 6 || $sql_type == 8 ) {
+        return rand(6);
+    }
+    # looks like string
+    elsif ( $sql_type == 1 || $sql_type == 12 ) {
         return $self->{string_random}->randregex("[A-Za-z0-9]{32}");
     }
-
-    return int(rand(10) * 10);
+    # looks like date
+    elsif ( $sql_type == 9 ) {
+        return localtime()->mysql_date;
+    }
+    # looks like time
+    elsif ( $sql_type == 10 ) {
+        return localtime()->mysql_time;
+    }
+    # looks like datetime or timestamp
+    elsif ( $sql_type == 11 ) {
+        return localtime()->mysql_datetime;
+    }
+    else {
+        return int(rand(1) * 10000000);
+    }
 }
 
 1;

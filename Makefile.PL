@@ -30,6 +30,7 @@ requires      'Teng';
 requires      'Data::Util';
 requires      'Hash::Merge::Simple';
 requires      'String::Random';
+requires      'Time::Piece::MySQL';
 
 test_requires 'Test::More'     => '0.88';
 test_requires 'Test::Requires' => '0.06';
