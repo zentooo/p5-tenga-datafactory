@@ -207,7 +207,7 @@ __END__
 
 =head1 NAME
 
-TengA::DataFactory - Perl extention to do something
+TengA::DataFactory - create test data easily with Teng
 
 =head1 VERSION
 
@@ -217,9 +217,28 @@ This document describes TengA::DataFactory version 0.01.
 
     use TengA::DataFactory;
 
-=head1 DESCRIPTION
+    my $df = TengA::DataFactory->new(teng => $teng); # teng instance
 
-# TODO
+    $df->define("user_base", +{
+        table => "user",
+        data => +{
+            id => $df->seq,
+            name => "foo",
+            country => "Japan",
+            address => "bar"
+        }
+    });
+
+    $df->define("nobita", +{
+        extend => "user_base",
+        data => +{
+            name => "Nobi Nobita",
+        }
+    });
+
+    $df->create("nobita"); # data created with defined parameter, inherited parameter and auto-filled values
+
+=head1 DESCRIPTION
 
 =head1 INTERFACE
 
